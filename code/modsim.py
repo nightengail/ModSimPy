@@ -140,6 +140,48 @@ def linspace(start, stop, num=50, **options):
     return array
 
 
+# def linrange(start=0, stop=None, step=1, **options):
+#     """Returns an array of evenly-spaced values in the interval [start, stop].
+
+#     This function works best if the space between start and stop
+#     is divisible by step; otherwise the results might be surprising.
+
+#     By default, the last value in the array is `stop-step`
+#     (at least approximately).
+#     If you provide the keyword argument `endpoint=True`,
+#     the last value in the array is `stop`.
+
+#     start: first value
+#     stop: last value
+#     step: space between values
+
+#     Also accepts the same keyword arguments as np.linspace.  See
+#     https://docs.scipy.org/doc/numpy/reference/generated/numpy.linspace.html
+
+#     returns: array or Quantity
+#     """
+#     if stop is None:
+#         stop = start
+#         start = 0
+
+#     # TODO: what breaks if we don't make the dtype float?
+#     #underride(options, endpoint=True, dtype=np.float64)
+#     underride(options, endpoint=False)
+
+#     # see if any of the arguments has units
+#     units = getattr(start, 'units', None)
+#     units = getattr(stop, 'units', units)
+#     units = getattr(step, 'units', units)
+
+#     n = np.round((stop - start) / step)
+#     if options['endpoint']:
+#         n += 1
+
+#     array = np.linspace(start, stop, int(n), **options)
+#     if units:
+#         array = array * units
+#     return array
+
 def linrange(start=0, stop=None, step=1, **options):
     """Returns an array of evenly-spaced values in the interval [start, stop].
 
@@ -154,9 +196,6 @@ def linrange(start=0, stop=None, step=1, **options):
     start: first value
     stop: last value
     step: space between values
-
-    Also accepts the same keyword arguments as np.linspace.  See
-    https://docs.scipy.org/doc/numpy/reference/generated/numpy.linspace.html
 
     returns: array or Quantity
     """
@@ -177,11 +216,13 @@ def linrange(start=0, stop=None, step=1, **options):
     if options['endpoint']:
         n += 1
 
-    array = np.linspace(start, stop, int(n), **options)
+    array = np.full(int(n), magnitude(step))
+    array[0] = magnitude(start)
+    array = np.cumsum(array)
+
     if units:
         array = array * units
     return array
-
 
 def magnitude(x):
     """Returns the magnitude of a Quantity or number.
